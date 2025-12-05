@@ -12,56 +12,76 @@ import java.util.List;
 @Service
 public class PieceService {
 
-	private final PieceRepository pieceRepo;
-	private final BoxRepository boxRepo;
+	private final PieceRepository pieceRepository;
+	private final BoxRepository boxRepository;
+	private final BoxService boxService;
 
-	public PieceService(PieceRepository pieceRepo, BoxRepository boxRepo) {
-		this.pieceRepo = pieceRepo;
-		this.boxRepo = boxRepo;
+	public PieceService(PieceRepository pieceRepository, BoxRepository boxRepository, BoxService boxService) {
+		this.pieceRepository = pieceRepository;
+		this.boxRepository = boxRepository;
+		this.boxService = boxService;
 	}
 
+	@Transactional
 	public Piece addPiece(Piece piece) {
 
-		boxRepo.findById(piece.getBoxId()).orElseThrow(() -> new RuntimeException("Box not found"));
+		boxRepository.findById(piece.getBoxId()).orElseThrow(() -> new RuntimeException("Box not found"));
 
 		piece.setCreatedAt(LocalDateTime.now());
-		piece.setSold(false);
 		piece.setUpdatedAt(null);
+		piece.setSold(false);
 
-		return pieceRepo.save(piece);
+		Piece saved = pieceRepository.save(piece);
+
+		boxService.recalcBoxTotals(piece.getBoxId());
+
+		return saved;
 	}
 
+	@Transactional
 	public Piece updatePiece(Long id, Piece newPiece) {
-		Piece p = getById(id);
+		Piece existing = pieceRepository.findById(id).orElseThrow(() -> new RuntimeException("Piece not found"));
 
-		p.setBarcode(newPiece.getBarcode()); 
-		p.setType(newPiece.getType());
-		p.setPurity(newPiece.getPurity());
-		p.setNetWeight(newPiece.getNetWeight());
-		p.setVariableWeight(newPiece.getVariableWeight());
-		p.setUpdatedAt(LocalDateTime.now());
+		Long boxId = existing.getBoxId();
 
-		return pieceRepo.save(p);
+		existing.setBarcode(newPiece.getBarcode());
+		existing.setType(newPiece.getType());
+		existing.setPurity(newPiece.getPurity());
+		existing.setNetWeight(newPiece.getNetWeight());
+		existing.setVariableWeight(newPiece.getVariableWeight());
+		existing.setUpdatedAt(LocalDateTime.now());
+
+		Piece saved = pieceRepository.save(existing);
+
+		boxService.recalcBoxTotals(boxId);
+
+		return saved;
 	}
 
 	public List<Piece> getAll() {
-		return pieceRepo.findAll();
+		return pieceRepository.findAll();
 	}
 
 	public Piece getById(Long id) {
-		return pieceRepo.findById(id).orElseThrow(() -> new RuntimeException("Piece not found"));
+		return pieceRepository.findById(id).orElseThrow(() -> new RuntimeException("Piece not found"));
 	}
 
 	@Transactional
 	public Piece transferPiece(Long pieceId, Long newBoxId) {
 		Piece piece = getById(pieceId);
 
-		boxRepo.findById(newBoxId).orElseThrow(() -> new RuntimeException("Target box not found"));
+		boxRepository.findById(newBoxId).orElseThrow(() -> new RuntimeException("Target box not found"));
 
+		Long oldBoxId = piece.getBoxId();
 		piece.setBoxId(newBoxId);
 		piece.setUpdatedAt(LocalDateTime.now());
 
-		return pieceRepo.save(piece);
+		Piece saved = pieceRepository.save(piece);
+
+		boxService.recalcBoxTotals(oldBoxId);
+		boxService.recalcBoxTotals(newBoxId);
+
+		return saved;
 	}
 
 	@Transactional
@@ -73,8 +93,13 @@ public class PieceService {
 		}
 
 		piece.setSold(true);
+		piece.setSoldAt(LocalDateTime.now());
 		piece.setUpdatedAt(LocalDateTime.now());
 
-		return pieceRepo.save(piece);
+		Piece saved = pieceRepository.save(piece);
+
+		boxService.recalcBoxTotals(piece.getBoxId());
+
+		return saved;
 	}
 }

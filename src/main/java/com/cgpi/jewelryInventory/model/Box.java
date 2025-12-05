@@ -37,6 +37,7 @@ public class Box {
 
     public Box() {}
 
+    // getters / setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -70,7 +71,6 @@ public class Box {
     public Long getCounterId() { return counterId; }
     public void setCounterId(Long counterId) { this.counterId = counterId; }
 
-    // Convenience: recalc gross weight from fixed + net
     public void recalcGrossWeight() {
         double f = fixedWeight == null ? 0.0 : fixedWeight;
         double n = netWeight == null ? 0.0 : netWeight;
