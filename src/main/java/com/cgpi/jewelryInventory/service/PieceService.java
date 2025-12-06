@@ -65,6 +65,10 @@ public class PieceService {
 	public Piece getById(Long id) {
 		return pieceRepository.findById(id).orElseThrow(() -> new RuntimeException("Piece not found"));
 	}
+	
+	public List<Piece> getByBoxId(Long boxId) {
+	    return pieceRepository.findByBoxId(boxId);
+	}
 
 	@Transactional
 	public Piece transferPiece(Long pieceId, Long newBoxId) {

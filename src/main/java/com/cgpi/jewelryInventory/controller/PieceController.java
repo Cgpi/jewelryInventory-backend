@@ -40,6 +40,11 @@ public class PieceController {
     public ResponseEntity<Piece> getById(@RequestParam Long id) {
         return ResponseEntity.ok(service.getById(id));
     }
+    
+    @GetMapping("/getByBoxId")
+    public ResponseEntity<List<Piece>> getByBoxId(@RequestParam Long boxId) {
+        return ResponseEntity.ok(service.getByBoxId(boxId));
+    }
 
     @PostMapping("/transfer")
     @PreAuthorize("hasAnyRole('ADMIN','ACCOUNT')")

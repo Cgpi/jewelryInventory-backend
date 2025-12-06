@@ -78,6 +78,10 @@ public class BoxService {
 	public Box getById(Long id) {
 		return repo.findById(id).orElseThrow(() -> new RuntimeException("Box not found"));
 	}
+	
+	public List<Box> getByCounterId(Long counterId) {
+	    return repo.findByCounterId(counterId);
+	}
 
 	public Box transferBox(Long boxId, Long targetCounterId) {
 		Box box = getById(boxId);

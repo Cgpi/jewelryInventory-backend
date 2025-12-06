@@ -34,6 +34,11 @@ public class BoxController {
     public ResponseEntity<Box> getById(@RequestParam Long id) {
         return ResponseEntity.ok(service.getById(id));
     }
+    
+    @GetMapping("/getByCounterId")
+    public ResponseEntity<List<Box>> getByCounterId(@RequestParam Long counterId) {
+        return ResponseEntity.ok(service.getByCounterId(counterId));
+    }
 
     @PutMapping("/update")
     @PreAuthorize("hasRole('ADMIN')")
