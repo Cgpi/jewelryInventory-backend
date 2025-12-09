@@ -13,24 +13,21 @@ import java.util.stream.Collectors;
 @Service
 public class AdminDetailsService implements UserDetailsService {
 
-    private final AdminRepository adminRepository;
+	private final AdminRepository adminRepository;
 
-    public AdminDetailsService(AdminRepository adminRepository) {
-        this.adminRepository = adminRepository;
-    }
+	public AdminDetailsService(AdminRepository adminRepository) {
+		this.adminRepository = adminRepository;
+	}
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-        Admin admin = adminRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+		Admin admin = adminRepository.findByUsername(username)
+				.orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        List<SimpleGrantedAuthority> authorities =
-                Arrays.stream(admin.getRoles().split(","))
-                        .map(String::trim)
-                        .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toList());
+		List<SimpleGrantedAuthority> authorities = Arrays.stream(admin.getRoles().split(",")).map(String::trim)
+				.map(SimpleGrantedAuthority::new).collect(Collectors.toList());
 
-        return new User(admin.getUsername(), admin.getPassword(), authorities);
-    }
+		return new User(admin.getUsername(), admin.getPassword(), authorities);
+	}
 }

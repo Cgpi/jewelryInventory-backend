@@ -13,40 +13,38 @@ import java.util.List;
 @CrossOrigin("*")
 public class CounterController {
 
-    private final CounterService service;
+	private final CounterService service;
 
-    public CounterController(CounterService service) {
-        this.service = service;
-    }
+	public CounterController(CounterService service) {
+		this.service = service;
+	}
 
-    @PostMapping("/add")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Counter> addCounter(@RequestBody Counter counter) {
-        return ResponseEntity.ok(service.addCounter(counter));
-    }
+	@PostMapping("/add")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<Counter> addCounter(@RequestBody Counter counter) {
+		return ResponseEntity.ok(service.addCounter(counter));
+	}
 
-    @PutMapping("/update")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Counter> updateCounter(
-            @RequestParam Long id,
-            @RequestBody Counter counter) {
-        return ResponseEntity.ok(service.updateCounter(id, counter));
-    }
+	@PutMapping("/update")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<Counter> updateCounter(@RequestParam Long id, @RequestBody Counter counter) {
+		return ResponseEntity.ok(service.updateCounter(id, counter));
+	}
 
-    @DeleteMapping("/delete")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> deleteCounter(@RequestParam Long id) {
-        service.softDelete(id);
-        return ResponseEntity.ok("Counter soft-deleted successfully");
-    }
+	@DeleteMapping("/delete")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<String> deleteCounter(@RequestParam Long id) {
+		service.softDelete(id);
+		return ResponseEntity.ok("Counter soft-deleted successfully");
+	}
 
-    @GetMapping("/getAll")
-    public ResponseEntity<List<Counter>> getAll() {
-        return ResponseEntity.ok(service.getAll());
-    }
+	@GetMapping("/getAll")
+	public ResponseEntity<List<Counter>> getAll() {
+		return ResponseEntity.ok(service.getAll());
+	}
 
-    @GetMapping("/getById")
-    public ResponseEntity<Counter> getById(@RequestParam Long id) {
-        return ResponseEntity.ok(service.getById(id));
-    }
+	@GetMapping("/getById")
+	public ResponseEntity<Counter> getById(@RequestParam Long id) {
+		return ResponseEntity.ok(service.getById(id));
+	}
 }

@@ -13,42 +13,40 @@ import java.util.List;
 @CrossOrigin("*")
 public class PurityController {
 
-    private final PurityService service;
+	private final PurityService service;
 
-    public PurityController(PurityService service) {
-        this.service = service;
-    }
+	public PurityController(PurityService service) {
+		this.service = service;
+	}
 
-    @PostMapping("/add")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Purity> addPurity(@RequestBody Purity purity) {
-        return ResponseEntity.ok(service.addPurity(purity));
-    }
+	@PostMapping("/add")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<Purity> addPurity(@RequestBody Purity purity) {
+		return ResponseEntity.ok(service.addPurity(purity));
+	}
 
-    @GetMapping("/getAll")
-    public ResponseEntity<List<Purity>> getAllPurities() {
-        return ResponseEntity.ok(service.getAll());
-    }
+	@GetMapping("/getAll")
+	public ResponseEntity<List<Purity>> getAllPurities() {
+		return ResponseEntity.ok(service.getAll());
+	}
 
-    @GetMapping("/getById")
-    public ResponseEntity<Purity> getPurityById(@RequestParam Long id) {
-        Purity purity = service.getAll().stream()
-                .filter(p -> p.getId().equals(id))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Purity not found"));
-        return ResponseEntity.ok(purity);
-    }
+	@GetMapping("/getById")
+	public ResponseEntity<Purity> getPurityById(@RequestParam Long id) {
+		Purity purity = service.getAll().stream().filter(p -> p.getId().equals(id)).findFirst()
+				.orElseThrow(() -> new RuntimeException("Purity not found"));
+		return ResponseEntity.ok(purity);
+	}
 
-    @PutMapping("/update")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Purity> updatePurity(@RequestParam Long id, @RequestBody Purity purity) {
-        return ResponseEntity.ok(service.updatePurity(id, purity));
-    }
+	@PutMapping("/update")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<Purity> updatePurity(@RequestParam Long id, @RequestBody Purity purity) {
+		return ResponseEntity.ok(service.updatePurity(id, purity));
+	}
 
-    @DeleteMapping("/delete")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> deletePurity(@RequestParam Long id) {
-        service.softDelete(id);
-        return ResponseEntity.ok("Purity soft-deleted successfully");
-    }
+	@DeleteMapping("/delete")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<String> deletePurity(@RequestParam Long id) {
+		service.softDelete(id);
+		return ResponseEntity.ok("Purity soft-deleted successfully");
+	}
 }

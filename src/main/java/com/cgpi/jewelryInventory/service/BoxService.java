@@ -1,9 +1,11 @@
 package com.cgpi.jewelryInventory.service;
 
 import com.cgpi.jewelryInventory.model.Box;
+import com.cgpi.jewelryInventory.model.LooseItem;
 import com.cgpi.jewelryInventory.model.Piece;
 import com.cgpi.jewelryInventory.repository.BoxRepository;
 import com.cgpi.jewelryInventory.repository.CounterRepository;
+import com.cgpi.jewelryInventory.repository.LooseItemRepository;
 import com.cgpi.jewelryInventory.repository.PieceRepository;
 import org.springframework.stereotype.Service;
 
@@ -14,14 +16,17 @@ import java.util.List;
 public class BoxService {
 
 	private final BoxRepository repo;
-	private final CounterRepository counterRepository;
-	private final PieceRepository pieceRepository;
+    private final CounterRepository counterRepository;
+    private final PieceRepository pieceRepository;
+    private final LooseItemRepository looseItemRepository;
 
-	public BoxService(BoxRepository repo, CounterRepository counterRepository, PieceRepository pieceRepository) {
-		this.repo = repo;
-		this.counterRepository = counterRepository;
-		this.pieceRepository = pieceRepository;
-	}
+    public BoxService(BoxRepository repo, CounterRepository counterRepository,
+                      PieceRepository pieceRepository, LooseItemRepository looseItemRepository) {
+        this.repo = repo;
+        this.counterRepository = counterRepository;
+        this.pieceRepository = pieceRepository;
+        this.looseItemRepository = looseItemRepository;
+    }
 
 	public Box createBox(Box box) {
 		if (box.getCounterId() == null) {
@@ -78,9 +83,9 @@ public class BoxService {
 	public Box getById(Long id) {
 		return repo.findById(id).orElseThrow(() -> new RuntimeException("Box not found"));
 	}
-	
+
 	public List<Box> getByCounterId(Long counterId) {
-	    return repo.findByCounterId(counterId);
+		return repo.findByCounterId(counterId);
 	}
 
 	public Box transferBox(Long boxId, Long targetCounterId) {
@@ -98,26 +103,31 @@ public class BoxService {
 		return repo.save(box);
 	}
 
-	public void recalcBoxTotals(Long boxId) {
-		Box box = repo.findById(boxId).orElseThrow(() -> new RuntimeException("Box not found"));
+    public void recalcBoxTotals(Long boxId) {
+        Box box = repo.findById(boxId).orElseThrow(() -> new RuntimeException("Box not found"));
 
-		List<Piece> pieces = pieceRepository.findByBoxId(boxId);
+        // Pieces
+        List<Piece> pieces = pieceRepository.findByBoxId(boxId);
+        double totalPieceNet = pieces.stream().filter(p -> !p.isSold())
+                .mapToDouble(p -> p.getNetWeight() == null ? 0.0 : p.getNetWeight()).sum();
+        double totalPieceVar = pieces.stream().filter(p -> !p.isSold())
+                .mapToDouble(p -> p.getVariableWeight() == null ? 0.0 : p.getVariableWeight()).sum();
+        int totalPieceCount = (int) pieces.stream().filter(p -> !p.isSold()).count();
 
-		double totalNet = pieces.stream().filter(p -> !p.isSold())
-				.mapToDouble(p -> p.getNetWeight() == null ? 0.0 : p.getNetWeight()).sum();
+        // LooseItems
+        List<LooseItem> looseItems = looseItemRepository.findByBoxId(boxId);
+        double totalLooseNet = looseItems.stream().filter(l -> !l.isSold())
+                .mapToDouble(l -> l.getNetWeight() == null ? 0.0 : l.getNetWeight()).sum();
+        double totalLooseVar = looseItems.stream().filter(l -> !l.isSold())
+                .mapToDouble(l -> l.getVariableWeight() == null ? 0.0 : l.getVariableWeight()).sum();
 
-		double totalVar = pieces.stream().filter(p -> !p.isSold())
-				.mapToDouble(p -> p.getVariableWeight() == null ? 0.0 : p.getVariableWeight()).sum();
+        // Update Box
+        box.setNetWeight(totalPieceNet + totalLooseNet);
+        box.setVariableWeight(totalPieceVar + totalLooseVar);
+        box.setTotalPiece(totalPieceCount); // LooseItems don't increase count
 
-		int count = (int) pieces.stream().filter(p -> !p.isSold()).count();
-
-		box.setNetWeight(totalNet);
-		box.setVariableWeight(totalVar);
-		box.setTotalPiece(count);
-
-		box.recalcGrossWeight();
-
-		box.setUpdatedAt(LocalDateTime.now());
-		repo.save(box);
-	}
+        box.recalcGrossWeight();
+        box.setUpdatedAt(LocalDateTime.now());
+        repo.save(box);
+    }
 }

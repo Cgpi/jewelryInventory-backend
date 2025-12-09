@@ -7,69 +7,125 @@ import java.time.LocalDateTime;
 @Table(name = "pieces")
 public class Piece {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    private String barcode;
+	private String barcode;
 
-    @Column(nullable = false)
-    private String type;
+	@Column(nullable = false)
+	private String type;
 
-    @Column(nullable = false)
-    private String purity;
+	@Column(nullable = false)
+	private String purity;
 
-    @Column(nullable = false)
-    private Double netWeight;
+	@Column(nullable = false)
+	private Double netWeight;
 
-    @Column(nullable = false)
-    private Double variableWeight;
+	@Column(nullable = false)
+	private Double variableWeight;
 
-    @Column(nullable = false)
-    private Long boxId;
+	@Column(nullable = false)
+	private Long boxId;
 
-    @Column(nullable = false)
-    private boolean sold = false;
+	@Column(nullable = false)
+	private boolean sold = false;
 
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+	@Column(nullable = false, updatable = false)
+	private LocalDateTime createdAt = LocalDateTime.now();
 
-    private LocalDateTime updatedAt;
+	private LocalDateTime updatedAt;
 
-    private LocalDateTime soldAt;
+	private LocalDateTime soldAt;
 
-    public Piece() {}
+	public Piece() {
+	}
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+	public Long getId() {
+		return id;
+	}
 
-    public String getBarcode() { return barcode; }
-    public void setBarcode(String barcode) { this.barcode = barcode; }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public String getType() { return type; }
-    public void setType(String type) { this.type = type; }
+	public String getBarcode() {
+		return barcode;
+	}
 
-    public String getPurity() { return purity; }
-    public void setPurity(String purity) { this.purity = purity; }
+	public void setBarcode(String barcode) {
+		this.barcode = barcode;
+	}
 
-    public Double getNetWeight() { return netWeight; }
-    public void setNetWeight(Double netWeight) { this.netWeight = netWeight; }
+	public String getType() {
+		return type;
+	}
 
-    public Double getVariableWeight() { return variableWeight; }
-    public void setVariableWeight(Double variableWeight) { this.variableWeight = variableWeight; }
+	public void setType(String type) {
+		this.type = type;
+	}
 
-    public Long getBoxId() { return boxId; }
-    public void setBoxId(Long boxId) { this.boxId = boxId; }
+	public String getPurity() {
+		return purity;
+	}
 
-    public boolean isSold() { return sold; }
-    public void setSold(boolean sold) { this.sold = sold; }
+	public void setPurity(String purity) {
+		this.purity = purity;
+	}
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+	public Double getNetWeight() {
+		return netWeight;
+	}
 
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+	public void setNetWeight(Double netWeight) {
+		this.netWeight = netWeight;
+	}
 
-    public LocalDateTime getSoldAt() { return soldAt; }
-    public void setSoldAt(LocalDateTime soldAt) { this.soldAt = soldAt; }
+	public Double getVariableWeight() {
+		return variableWeight;
+	}
+
+	public void setVariableWeight(Double variableWeight) {
+		this.variableWeight = variableWeight;
+	}
+
+	public Long getBoxId() {
+		return boxId;
+	}
+
+	public void setBoxId(Long boxId) {
+		this.boxId = boxId;
+	}
+
+	public boolean isSold() {
+		return sold;
+	}
+
+	public void setSold(boolean sold) {
+		this.sold = sold;
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public LocalDateTime getUpdatedAt() {
+		return updatedAt;
+	}
+
+	public void setUpdatedAt(LocalDateTime updatedAt) {
+		this.updatedAt = updatedAt;
+	}
+
+	public LocalDateTime getSoldAt() {
+		return soldAt;
+	}
+
+	public void setSoldAt(LocalDateTime soldAt) {
+		this.soldAt = soldAt;
+	}
 }

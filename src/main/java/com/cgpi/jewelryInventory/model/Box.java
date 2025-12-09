@@ -7,73 +7,128 @@ import java.time.LocalDateTime;
 @Table(name = "boxes", uniqueConstraints = { @UniqueConstraint(columnNames = "identity") })
 public class Box {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Column(nullable = false)
-    private String type;
+	@Column(nullable = false)
+	private String type;
 
-    @Column(nullable = false, unique = true)
-    private String identity;
+	@Column(nullable = false, unique = true)
+	private String identity;
 
-    @Column(nullable = false)
-    private Double fixedWeight;
+	@Column(nullable = false)
+	private Double fixedWeight;
 
-    private Double netWeight = 0.0;
-    private Double variableWeight = 0.0;
-    private Double grossWeight = 0.0;
+	private Double netWeight = 0.0;
+	private Double variableWeight = 0.0;
+	private Double grossWeight = 0.0;
 
-    private Integer totalPiece = 0;
+	private Integer totalPiece = 0;
 
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+	@Column(nullable = false, updatable = false)
+	private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column
-    private LocalDateTime updatedAt;
+	@Column
+	private LocalDateTime updatedAt;
 
-    @Column(nullable = false)
-    private Long counterId;
+	@Column(nullable = false)
+	private Long counterId;
 
-    public Box() {}
+	public Box() {
+	}
 
-    // getters / setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+	public Long getId() {
+		return id;
+	}
 
-    public String getType() { return type; }
-    public void setType(String type) { this.type = type; }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public String getIdentity() { return identity; }
-    public void setIdentity(String identity) { this.identity = identity; }
+	public String getType() {
+		return type;
+	}
 
-    public Double getFixedWeight() { return fixedWeight; }
-    public void setFixedWeight(Double fixedWeight) { this.fixedWeight = fixedWeight; }
+	public void setType(String type) {
+		this.type = type;
+	}
 
-    public Double getNetWeight() { return netWeight; }
-    public void setNetWeight(Double netWeight) { this.netWeight = netWeight; }
+	public String getIdentity() {
+		return identity;
+	}
 
-    public Double getVariableWeight() { return variableWeight; }
-    public void setVariableWeight(Double variableWeight) { this.variableWeight = variableWeight; }
+	public void setIdentity(String identity) {
+		this.identity = identity;
+	}
 
-    public Double getGrossWeight() { return grossWeight; }
-    public void setGrossWeight(Double grossWeight) { this.grossWeight = grossWeight; }
+	public Double getFixedWeight() {
+		return fixedWeight;
+	}
 
-    public Integer getTotalPiece() { return totalPiece; }
-    public void setTotalPiece(Integer totalPiece) { this.totalPiece = totalPiece; }
+	public void setFixedWeight(Double fixedWeight) {
+		this.fixedWeight = fixedWeight;
+	}
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+	public Double getNetWeight() {
+		return netWeight;
+	}
 
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+	public void setNetWeight(Double netWeight) {
+		this.netWeight = netWeight;
+	}
 
-    public Long getCounterId() { return counterId; }
-    public void setCounterId(Long counterId) { this.counterId = counterId; }
+	public Double getVariableWeight() {
+		return variableWeight;
+	}
 
-    public void recalcGrossWeight() {
-        double f = fixedWeight == null ? 0.0 : fixedWeight;
-        double n = netWeight == null ? 0.0 : netWeight;
-        this.grossWeight = f + n;
-    }
+	public void setVariableWeight(Double variableWeight) {
+		this.variableWeight = variableWeight;
+	}
+
+	public Double getGrossWeight() {
+		return grossWeight;
+	}
+
+	public void setGrossWeight(Double grossWeight) {
+		this.grossWeight = grossWeight;
+	}
+
+	public Integer getTotalPiece() {
+		return totalPiece;
+	}
+
+	public void setTotalPiece(Integer totalPiece) {
+		this.totalPiece = totalPiece;
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public LocalDateTime getUpdatedAt() {
+		return updatedAt;
+	}
+
+	public void setUpdatedAt(LocalDateTime updatedAt) {
+		this.updatedAt = updatedAt;
+	}
+
+	public Long getCounterId() {
+		return counterId;
+	}
+
+	public void setCounterId(Long counterId) {
+		this.counterId = counterId;
+	}
+
+	public void recalcGrossWeight() {
+		double f = fixedWeight == null ? 0.0 : fixedWeight;
+		double n = netWeight == null ? 0.0 : netWeight;
+		this.grossWeight = f + n;
+	}
 }

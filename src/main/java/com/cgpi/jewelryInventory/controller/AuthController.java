@@ -15,38 +15,35 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin("*")
 public class AuthController {
 
-    private final AdminService adminService;
-    private final AuthenticationManager authManager;
-    private final JwtUtil jwtUtil;
+	private final AdminService adminService;
+	private final AuthenticationManager authManager;
+	private final JwtUtil jwtUtil;
 
-    public AuthController(AdminService adminService, AuthenticationManager authManager, JwtUtil jwtUtil) {
-        this.adminService = adminService;
-        this.authManager = authManager;
-        this.jwtUtil = jwtUtil;
-    }
+	public AuthController(AdminService adminService, AuthenticationManager authManager, JwtUtil jwtUtil) {
+		this.adminService = adminService;
+		this.authManager = authManager;
+		this.jwtUtil = jwtUtil;
+	}
 
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+	@PostMapping("/register")
+	public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
 
-        Admin saved = adminService.register(request);
-        return ResponseEntity.ok("User registered with role: " + saved.getRoles());
-    }
+		Admin saved = adminService.register(request);
+		return ResponseEntity.ok("User registered with role: " + saved.getRoles());
+	}
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+	@PostMapping("/login")
+	public ResponseEntity<?> login(@RequestBody LoginRequest request) {
 
-        Authentication auth = authManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-        );
+		Authentication auth = authManager
+				.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 
-        User user = (User) auth.getPrincipal();
+		User user = (User) auth.getPrincipal();
 
-        String roles = String.join(",", user.getAuthorities().stream()
-                .map(a -> a.getAuthority())
-                .toList());
+		String roles = String.join(",", user.getAuthorities().stream().map(a -> a.getAuthority()).toList());
 
-        String token = jwtUtil.generateToken(user.getUsername(), roles);
+		String token = jwtUtil.generateToken(user.getUsername(), roles);
 
-        return ResponseEntity.ok(new AuthResponse(token));
-    }
+		return ResponseEntity.ok(new AuthResponse(token));
+	}
 }

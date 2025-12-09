@@ -13,42 +13,40 @@ import java.util.List;
 @CrossOrigin("*")
 public class TypeController {
 
-    private final TypeService service;
+	private final TypeService service;
 
-    public TypeController(TypeService service) {
-        this.service = service;
-    }
+	public TypeController(TypeService service) {
+		this.service = service;
+	}
 
-    @PostMapping("/add")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Type> addType(@RequestBody Type type) {
-        return ResponseEntity.ok(service.addType(type));
-    }
+	@PostMapping("/add")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<Type> addType(@RequestBody Type type) {
+		return ResponseEntity.ok(service.addType(type));
+	}
 
-    @GetMapping("/getAll")
-    public ResponseEntity<List<Type>> getAllTypes() {
-        return ResponseEntity.ok(service.getAll());
-    }
+	@GetMapping("/getAll")
+	public ResponseEntity<List<Type>> getAllTypes() {
+		return ResponseEntity.ok(service.getAll());
+	}
 
-    @GetMapping("/getById")
-    public ResponseEntity<Type> getTypeById(@RequestParam Long id) {
-        Type type = service.getAll().stream()
-                .filter(t -> t.getId().equals(id))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Type not found"));
-        return ResponseEntity.ok(type);
-    }
+	@GetMapping("/getById")
+	public ResponseEntity<Type> getTypeById(@RequestParam Long id) {
+		Type type = service.getAll().stream().filter(t -> t.getId().equals(id)).findFirst()
+				.orElseThrow(() -> new RuntimeException("Type not found"));
+		return ResponseEntity.ok(type);
+	}
 
-    @PutMapping("/update")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Type> updateType(@RequestParam Long id, @RequestBody Type type) {
-        return ResponseEntity.ok(service.updateType(id, type));
-    }
+	@PutMapping("/update")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<Type> updateType(@RequestParam Long id, @RequestBody Type type) {
+		return ResponseEntity.ok(service.updateType(id, type));
+	}
 
-    @DeleteMapping("/delete")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> deleteType(@RequestParam Long id) {
-        service.softDelete(id);
-        return ResponseEntity.ok("Type soft-deleted successfully");
-    }
+	@DeleteMapping("/delete")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<String> deleteType(@RequestParam Long id) {
+		service.softDelete(id);
+		return ResponseEntity.ok("Type soft-deleted successfully");
+	}
 }

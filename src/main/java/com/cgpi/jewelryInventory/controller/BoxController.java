@@ -13,44 +13,42 @@ import java.util.List;
 @CrossOrigin("*")
 public class BoxController {
 
-    private final BoxService service;
+	private final BoxService service;
 
-    public BoxController(BoxService service) {
-        this.service = service;
-    }
+	public BoxController(BoxService service) {
+		this.service = service;
+	}
 
-    @PostMapping("/add")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Box> addBox(@RequestBody Box box) {
-        return ResponseEntity.ok(service.createBox(box));
-    }
-    
-    @GetMapping("/getAll")
-    public ResponseEntity<List<Box>> getAll() {
-        return ResponseEntity.ok(service.getAll());
-    }
+	@PostMapping("/add")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<Box> addBox(@RequestBody Box box) {
+		return ResponseEntity.ok(service.createBox(box));
+	}
 
-    @GetMapping("/getById")
-    public ResponseEntity<Box> getById(@RequestParam Long id) {
-        return ResponseEntity.ok(service.getById(id));
-    }
-    
-    @GetMapping("/getByCounterId")
-    public ResponseEntity<List<Box>> getByCounterId(@RequestParam Long counterId) {
-        return ResponseEntity.ok(service.getByCounterId(counterId));
-    }
+	@GetMapping("/getAll")
+	public ResponseEntity<List<Box>> getAll() {
+		return ResponseEntity.ok(service.getAll());
+	}
 
-    @PutMapping("/update")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Box> updateBox(@RequestParam Long id, @RequestBody Box box) {
-        return ResponseEntity.ok(service.updateBox(id, box));
-    }
+	@GetMapping("/getById")
+	public ResponseEntity<Box> getById(@RequestParam Long id) {
+		return ResponseEntity.ok(service.getById(id));
+	}
 
-    @PostMapping("/transfer")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Box> transferBox(
-            @RequestParam Long boxId,
-            @RequestParam Long counterId) {
-        return ResponseEntity.ok(service.transferBox(boxId, counterId));
-    }
+	@GetMapping("/getByCounterId")
+	public ResponseEntity<List<Box>> getByCounterId(@RequestParam Long counterId) {
+		return ResponseEntity.ok(service.getByCounterId(counterId));
+	}
+
+	@PutMapping("/update")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<Box> updateBox(@RequestParam Long id, @RequestBody Box box) {
+		return ResponseEntity.ok(service.updateBox(id, box));
+	}
+
+	@PostMapping("/transfer")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<Box> transferBox(@RequestParam Long boxId, @RequestParam Long counterId) {
+		return ResponseEntity.ok(service.transferBox(boxId, counterId));
+	}
 }
