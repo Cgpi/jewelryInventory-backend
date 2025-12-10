@@ -12,7 +12,7 @@ public class LooseItem {
     private Long id;
 
     @Column(nullable = false)
-    private String name; // no type/purity
+    private String name; 
 
     @Column(nullable = false)
     private Double netWeight;
@@ -36,7 +36,6 @@ public class LooseItem {
     public LooseItem() {
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getName() { return name; }
