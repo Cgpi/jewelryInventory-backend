@@ -12,132 +12,180 @@ import java.util.List;
 @Service
 public class LooseItemService {
 
-    private final LooseItemRepository looseItemRepository;
-    private final BoxRepository boxRepository;
-    private final BoxService boxService;
+	private final LooseItemRepository looseItemRepository;
+	private final BoxRepository boxRepository;
+	private final BoxService boxService;
+	private final InventoryStatementService statementService;
 
-    public LooseItemService(
-            LooseItemRepository looseItemRepository,
-            BoxRepository boxRepository,
-            BoxService boxService) {
-        this.looseItemRepository = looseItemRepository;
-        this.boxRepository = boxRepository;
-        this.boxService = boxService;
-    }
+	public LooseItemService(
+			LooseItemRepository looseItemRepository,
+			BoxRepository boxRepository,
+			BoxService boxService,
+			InventoryStatementService statementService) {
 
-    // ✅ ADD
-    @Transactional
-    public LooseItem addLooseItem(LooseItem item) {
-        boxRepository.findById(item.getBoxId())
-                .orElseThrow(() -> new RuntimeException("Box not found"));
+		this.looseItemRepository = looseItemRepository;
+		this.boxRepository = boxRepository;
+		this.boxService = boxService;
+		this.statementService = statementService;
+	}
 
-        if (item.getNetWeight() <= 0) {
-            throw new RuntimeException("Net weight must be positive");
-        }
+	@Transactional
+	public LooseItem addLooseItem(LooseItem item) {
+		boxRepository.findById(item.getBoxId())
+				.orElseThrow(() -> new RuntimeException("Box not found"));
 
-        item.setVariableWeight(item.getNetWeight()); // ✅ sync
-        item.setSold(false);
-        item.setCreatedAt(LocalDateTime.now());
-        item.setUpdatedAt(null);
+		if (item.getNetWeight() <= 0) {
+			throw new RuntimeException("Net weight must be positive");
+		}
 
-        LooseItem saved = looseItemRepository.save(item);
-        boxService.recalcBoxTotals(item.getBoxId());
+		item.setVariableWeight(item.getNetWeight());
+		item.setSold(false);
+		item.setCreatedAt(LocalDateTime.now());
+		item.setUpdatedAt(null);
 
-        return saved;
-    }
+		LooseItem saved = looseItemRepository.save(item);
+		boxService.recalcBoxTotals(item.getBoxId());
 
-    // ✅ UPDATE
-    @Transactional
-    public LooseItem updateLooseItem(Long id, LooseItem newItem) {
-        LooseItem existing = looseItemRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("LooseItem not found"));
+		statementService.log(
+				"LOOSE_ITEM",
+				saved.getId(),
+				"ADD",
+				saved.getBoxId(),
+				null,
+				null,
+				saved.getNetWeight(),
+				saved.getVariableWeight(),
+				0,
+				"Loose item added"
+		);
 
-        if (newItem.getNetWeight() <= 0) {
-            throw new RuntimeException("Net weight must be positive");
-        }
+		return saved;
+	}
 
-        Long boxId = existing.getBoxId();
+	@Transactional
+	public LooseItem updateLooseItem(Long id, LooseItem newItem) {
+		LooseItem existing = getById(id);
 
-        existing.setName(newItem.getName());
-        existing.setNetWeight(newItem.getNetWeight());
-        existing.setVariableWeight(newItem.getNetWeight()); // ✅ always sync
-        existing.setUpdatedAt(LocalDateTime.now());
+		if (newItem.getNetWeight() <= 0) {
+			throw new RuntimeException("Net weight must be positive");
+		}
 
-        LooseItem saved = looseItemRepository.save(existing);
-        boxService.recalcBoxTotals(boxId);
+		double oldWeight = existing.getNetWeight();
+		Long boxId = existing.getBoxId();
 
-        return saved;
-    }
+		existing.setName(newItem.getName());
+		existing.setNetWeight(newItem.getNetWeight());
+		existing.setVariableWeight(newItem.getNetWeight());
+		existing.setUpdatedAt(LocalDateTime.now());
 
-    // ✅ GETTERS
-    public List<LooseItem> getAll() {
-        return looseItemRepository.findAll();
-    }
+		LooseItem saved = looseItemRepository.save(existing);
+		boxService.recalcBoxTotals(boxId);
 
-    public LooseItem getById(Long id) {
-        return looseItemRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("LooseItem not found"));
-    }
+		statementService.log(
+				"LOOSE_ITEM",
+				saved.getId(),
+				"UPDATE",
+				boxId,
+				null,
+				null,
+				saved.getNetWeight() - oldWeight,
+				saved.getVariableWeight() - oldWeight,
+				0,
+				"Loose item updated"
+		);
 
-    public List<LooseItem> getByBoxId(Long boxId) {
-        return looseItemRepository.findByBoxId(boxId);
-    }
+		return saved;
+	}
 
-    // ✅ SELL BY WEIGHT
-    @Transactional
-    public LooseItem sellLooseItem(Long id, Double soldWeight) {
-        LooseItem item = getById(id);
+	public List<LooseItem> getAll() {
+		return looseItemRepository.findAll();
+	}
 
-        if (soldWeight <= 0) {
-            throw new RuntimeException("Sold weight must be positive");
-        }
+	public LooseItem getById(Long id) {
+		return looseItemRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("LooseItem not found"));
+	}
 
-        if (item.isSold()) {
-            throw new RuntimeException("Loose item already fully sold");
-        }
+	public List<LooseItem> getByBoxId(Long boxId) {
+		return looseItemRepository.findByBoxId(boxId);
+	}
 
-        if (soldWeight > item.getNetWeight()) {
-            throw new RuntimeException("Not enough weight available");
-        }
+	@Transactional
+	public LooseItem sellLooseItem(Long id, Double soldWeight) {
+		LooseItem item = getById(id);
 
-        // ✅ deduct from both
-        item.setNetWeight(item.getNetWeight() - soldWeight);
-        item.setVariableWeight(item.getVariableWeight() - soldWeight);
-        item.setUpdatedAt(LocalDateTime.now());
+		if (soldWeight <= 0) {
+			throw new RuntimeException("Sold weight must be positive");
+		}
+		if (item.isSold()) {
+			throw new RuntimeException("Loose item already fully sold");
+		}
+		if (soldWeight > item.getNetWeight()) {
+			throw new RuntimeException("Not enough weight available");
+		}
 
-        if (item.getNetWeight() == 0) {
-            item.setSold(true);
-            item.setSoldAt(LocalDateTime.now());
-        }
+		item.setNetWeight(item.getNetWeight() - soldWeight);
+		item.setVariableWeight(item.getVariableWeight() - soldWeight);
+		item.setUpdatedAt(LocalDateTime.now());
 
-        LooseItem saved = looseItemRepository.save(item);
-        boxService.recalcBoxTotals(item.getBoxId());
+		if (item.getNetWeight() == 0) {
+			item.setSold(true);
+			item.setSoldAt(LocalDateTime.now());
+		}
 
-        return saved;
-    }
+		LooseItem saved = looseItemRepository.save(item);
+		boxService.recalcBoxTotals(item.getBoxId());
 
-    // ✅ TRANSFER
-    @Transactional
-    public LooseItem transferLooseItem(Long itemId, Long targetBoxId) {
-        LooseItem item = getById(itemId);
+		statementService.log(
+				"LOOSE_ITEM",
+				saved.getId(),
+				"PARTIAL_SELL",
+				saved.getBoxId(),
+				null,
+				null,
+				-soldWeight,
+				-soldWeight,
+				0,
+				"Loose item sold by weight"
+		);
 
-        if (item.getBoxId().equals(targetBoxId)) {
-            throw new RuntimeException("LooseItem already in this box");
-        }
+		return saved;
+	}
 
-        boxRepository.findById(targetBoxId)
-                .orElseThrow(() -> new RuntimeException("Target box not found"));
+	@Transactional
+	public LooseItem transferLooseItem(Long itemId, Long targetBoxId) {
+		LooseItem item = getById(itemId);
 
-        Long oldBoxId = item.getBoxId();
+		if (item.getBoxId().equals(targetBoxId)) {
+			throw new RuntimeException("LooseItem already in this box");
+		}
 
-        item.setBoxId(targetBoxId);
-        item.setUpdatedAt(LocalDateTime.now());
+		boxRepository.findById(targetBoxId)
+				.orElseThrow(() -> new RuntimeException("Target box not found"));
 
-        LooseItem saved = looseItemRepository.save(item);
+		Long oldBoxId = item.getBoxId();
 
-        boxService.recalcBoxTotals(oldBoxId);
-        boxService.recalcBoxTotals(targetBoxId);
+		item.setBoxId(targetBoxId);
+		item.setUpdatedAt(LocalDateTime.now());
 
-        return saved;
-    }
+		LooseItem saved = looseItemRepository.save(item);
+
+		boxService.recalcBoxTotals(oldBoxId);
+		boxService.recalcBoxTotals(targetBoxId);
+
+		statementService.log(
+				"LOOSE_ITEM",
+				saved.getId(),
+				"TRANSFER",
+				null,
+				oldBoxId,
+				targetBoxId,
+				0.0,
+				0.0,
+				0,
+				"Loose item transferred"
+		);
+
+		return saved;
+	}
 }
