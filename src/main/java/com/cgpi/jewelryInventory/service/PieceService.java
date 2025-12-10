@@ -12,98 +12,128 @@ import java.util.List;
 @Service
 public class PieceService {
 
-	private final PieceRepository pieceRepository;
-	private final BoxRepository boxRepository;
-	private final BoxService boxService;
+    private final PieceRepository pieceRepository;
+    private final BoxRepository boxRepository;
+    private final BoxService boxService;
 
-	public PieceService(PieceRepository pieceRepository, BoxRepository boxRepository, BoxService boxService) {
-		this.pieceRepository = pieceRepository;
-		this.boxRepository = boxRepository;
-		this.boxService = boxService;
-	}
+    public PieceService(PieceRepository pieceRepository,
+                        BoxRepository boxRepository,
+                        BoxService boxService) {
+        this.pieceRepository = pieceRepository;
+        this.boxRepository = boxRepository;
+        this.boxService = boxService;
+    }
 
-	@Transactional
-	public Piece addPiece(Piece piece) {
+    /* ================= ADD ================= */
 
-		boxRepository.findById(piece.getBoxId()).orElseThrow(() -> new RuntimeException("Box not found"));
+    @Transactional
+    public Piece addPiece(Piece piece) {
+        boxRepository.findById(piece.getBoxId())
+                .orElseThrow(() -> new RuntimeException("Box not found"));
 
-		piece.setCreatedAt(LocalDateTime.now());
-		piece.setUpdatedAt(null);
-		piece.setSold(false);
+        piece.setCreatedAt(LocalDateTime.now());
+        piece.setUpdatedAt(null);
+        piece.setSold(false);
+        piece.setSoldAt(null);
 
-		Piece saved = pieceRepository.save(piece);
+        Piece saved = pieceRepository.save(piece);
 
-		boxService.recalcBoxTotals(piece.getBoxId());
+        boxService.recalcBoxTotals(piece.getBoxId());
+        return saved;
+    }
 
-		return saved;
-	}
+    /* ================= UPDATE ================= */
 
-	@Transactional
-	public Piece updatePiece(Long id, Piece newPiece) {
-		Piece existing = pieceRepository.findById(id).orElseThrow(() -> new RuntimeException("Piece not found"));
+    @Transactional
+    public Piece updatePiece(Long id, Piece newPiece) {
+        Piece existing = getById(id);
+        Long boxId = existing.getBoxId();
 
-		Long boxId = existing.getBoxId();
+        existing.setBarcode(newPiece.getBarcode());
+        existing.setType(newPiece.getType());
+        existing.setPurity(newPiece.getPurity());
+        existing.setNetWeight(newPiece.getNetWeight());
+        existing.setVariableWeight(newPiece.getVariableWeight());
+        existing.setUpdatedAt(LocalDateTime.now());
 
-		existing.setBarcode(newPiece.getBarcode());
-		existing.setType(newPiece.getType());
-		existing.setPurity(newPiece.getPurity());
-		existing.setNetWeight(newPiece.getNetWeight());
-		existing.setVariableWeight(newPiece.getVariableWeight());
-		existing.setUpdatedAt(LocalDateTime.now());
+        Piece saved = pieceRepository.save(existing);
+        boxService.recalcBoxTotals(boxId);
 
-		Piece saved = pieceRepository.save(existing);
+        return saved;
+    }
 
-		boxService.recalcBoxTotals(boxId);
+    /* ================= GET ================= */
 
-		return saved;
-	}
+    public List<Piece> getAll() {
+        return pieceRepository.findAll();
+    }
 
-	public List<Piece> getAll() {
-		return pieceRepository.findAll();
-	}
+    public Piece getById(Long id) {
+        return pieceRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Piece not found"));
+    }
 
-	public Piece getById(Long id) {
-		return pieceRepository.findById(id).orElseThrow(() -> new RuntimeException("Piece not found"));
-	}
+    public List<Piece> getByBoxId(Long boxId) {
+        return pieceRepository.findByBoxId(boxId);
+    }
 
-	public List<Piece> getByBoxId(Long boxId) {
-		return pieceRepository.findByBoxId(boxId);
-	}
+    /* ================= TRANSFER ================= */
 
-	@Transactional
-	public Piece transferPiece(Long pieceId, Long newBoxId) {
-		Piece piece = getById(pieceId);
+    @Transactional
+    public Piece transferPiece(Long pieceId, Long newBoxId) {
+        Piece piece = getById(pieceId);
 
-		boxRepository.findById(newBoxId).orElseThrow(() -> new RuntimeException("Target box not found"));
+        boxRepository.findById(newBoxId)
+                .orElseThrow(() -> new RuntimeException("Target box not found"));
 
-		Long oldBoxId = piece.getBoxId();
-		piece.setBoxId(newBoxId);
-		piece.setUpdatedAt(LocalDateTime.now());
+        Long oldBoxId = piece.getBoxId();
 
-		Piece saved = pieceRepository.save(piece);
+        piece.setBoxId(newBoxId);
+        piece.setUpdatedAt(LocalDateTime.now());
 
-		boxService.recalcBoxTotals(oldBoxId);
-		boxService.recalcBoxTotals(newBoxId);
+        Piece saved = pieceRepository.save(piece);
 
-		return saved;
-	}
+        boxService.recalcBoxTotals(oldBoxId);
+        boxService.recalcBoxTotals(newBoxId);
 
-	@Transactional
-	public Piece markSold(Long id) {
-		Piece piece = getById(id);
+        return saved;
+    }
 
-		if (piece.isSold()) {
-			throw new RuntimeException("Piece already sold");
-		}
+    /* ================= SELL ================= */
 
-		piece.setSold(true);
-		piece.setSoldAt(LocalDateTime.now());
-		piece.setUpdatedAt(LocalDateTime.now());
+    @Transactional
+    public Piece markSold(Long id) {
+        Piece piece = getById(id);
 
-		Piece saved = pieceRepository.save(piece);
+        if (piece.isSold()) {
+            throw new RuntimeException("Piece already sold");
+        }
 
-		boxService.recalcBoxTotals(piece.getBoxId());
+        piece.setSold(true);
+        piece.setSoldAt(LocalDateTime.now());
+        piece.setUpdatedAt(LocalDateTime.now());
 
-		return saved;
-	}
+        Piece saved = pieceRepository.save(piece);
+
+        // Recalculate because sold piece should be excluded
+        boxService.recalcBoxTotals(piece.getBoxId());
+
+        return saved;
+    }
+
+    /* ================= DELETE (PERMANENT) ================= */
+
+    @Transactional
+    public void deletePiece(Long id) {
+        Piece piece = getById(id);
+        Long boxId = piece.getBoxId();
+        boolean wasSold = piece.isSold();
+
+        pieceRepository.delete(piece);
+
+        // Recalculate only if it was UNSOLD
+        if (!wasSold) {
+            boxService.recalcBoxTotals(boxId);
+        }
+    }
 }
