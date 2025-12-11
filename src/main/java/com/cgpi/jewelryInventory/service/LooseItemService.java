@@ -35,7 +35,7 @@ public class LooseItemService {
 			throw new RuntimeException("Net weight must be positive");
 		}
 
-		item.setVariableWeight(item.getNetWeight());
+		item.setVariableWeight(item.getVariableWeight());
 		item.setSold(false);
 		item.setCreatedAt(LocalDateTime.now());
 		item.setUpdatedAt(null);
