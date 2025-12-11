@@ -11,13 +11,15 @@ public class InventoryStatement {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(nullable = false)
 	private String entityType;
-
-	@Column(nullable = false)
 	private Long entityId;
 
-	@Column(nullable = false)
+	private String barcode;
+	private String pieceType;
+	private String purity;
+
+	private String looseItemName;
+
 	private String action;
 
 	private Long boxId;
@@ -28,17 +30,11 @@ public class InventoryStatement {
 	private Double variableWeightChange;
 	private Integer pieceCountChange;
 
-	@Column(nullable = false)
 	private String performedByRole;
 
-	@Column(length = 1000)
+	private LocalDateTime actionTime = LocalDateTime.now();
+
 	private String remark;
-
-	@Column(nullable = false, updatable = false)
-	private LocalDateTime createdAt = LocalDateTime.now();
-
-	public InventoryStatement() {
-	}
 
 	public Long getId() {
 		return id;
@@ -62,6 +58,38 @@ public class InventoryStatement {
 
 	public void setEntityId(Long entityId) {
 		this.entityId = entityId;
+	}
+
+	public String getBarcode() {
+		return barcode;
+	}
+
+	public void setBarcode(String barcode) {
+		this.barcode = barcode;
+	}
+
+	public String getPieceType() {
+		return pieceType;
+	}
+
+	public void setPieceType(String pieceType) {
+		this.pieceType = pieceType;
+	}
+
+	public String getPurity() {
+		return purity;
+	}
+
+	public void setPurity(String purity) {
+		this.purity = purity;
+	}
+
+	public String getLooseItemName() {
+		return looseItemName;
+	}
+
+	public void setLooseItemName(String looseItemName) {
+		this.looseItemName = looseItemName;
 	}
 
 	public String getAction() {
@@ -128,6 +156,14 @@ public class InventoryStatement {
 		this.performedByRole = performedByRole;
 	}
 
+	public LocalDateTime getActionTime() {
+		return actionTime;
+	}
+
+	public void setActionTime(LocalDateTime actionTime) {
+		this.actionTime = actionTime;
+	}
+
 	public String getRemark() {
 		return remark;
 	}
@@ -135,13 +171,4 @@ public class InventoryStatement {
 	public void setRemark(String remark) {
 		this.remark = remark;
 	}
-
-	public LocalDateTime getCreatedAt() {
-		return createdAt;
-	}
-
-	public void setCreatedAt(LocalDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
-
 }
