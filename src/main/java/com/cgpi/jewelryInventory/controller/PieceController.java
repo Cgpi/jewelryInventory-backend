@@ -64,4 +64,20 @@ public class PieceController {
 		service.deletePiece(id);
 		return ResponseEntity.ok("Piece deleted permanently");
 	}
+	
+	@DeleteMapping("/deleteSold")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<String> deleteAllSold() {
+
+	    int count = service.deleteAllSoldPieces();
+	    return ResponseEntity.ok(count + " sold pieces deleted permanently");
+	}
+
+	@DeleteMapping("/deleteSoldByBox")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<String> deleteSoldByBox(@RequestParam Long boxId) {
+
+	    int count = service.deleteSoldPiecesByBox(boxId);
+	    return ResponseEntity.ok(count + " sold pieces deleted from box " + boxId);
+	}
 }

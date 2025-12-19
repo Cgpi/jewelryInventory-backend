@@ -7,4 +7,8 @@ import java.util.List;
 
 public interface PieceRepository extends JpaRepository<Piece, Long> {
 	List<Piece> findByBoxId(Long boxId);
+
+	List<Piece> findBySoldTrue();
+
+	List<Piece> findByBoxIdAndSoldTrue(Long boxId);
 }

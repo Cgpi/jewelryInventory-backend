@@ -142,4 +142,46 @@ public class PieceService {
 		statementService.logPiece(piece, "DELETE", null, null, -piece.getNetWeight(), -piece.getVariableWeight(), -1,
 				"Piece deleted");
 	}
+
+	@Transactional
+	public int deleteAllSoldPieces() {
+
+		List<Piece> soldPieces = pieceRepository.findBySoldTrue();
+
+		if (soldPieces.isEmpty()) {
+			return 0;
+		}
+
+		for (Piece piece : soldPieces) {
+			Long boxId = piece.getBoxId();
+
+			statementService.logPiece(piece, "DELETE_SOLD", null, null, -piece.getNetWeight(),
+					-piece.getVariableWeight(), -1, "Sold piece permanently deleted");
+
+			pieceRepository.delete(piece);
+			boxService.recalcBoxTotals(boxId);
+		}
+
+		return soldPieces.size();
+	}
+
+	@Transactional
+	public int deleteSoldPiecesByBox(Long boxId) {
+
+		List<Piece> soldPieces = pieceRepository.findByBoxIdAndSoldTrue(boxId);
+
+		if (soldPieces.isEmpty()) {
+			return 0;
+		}
+
+		for (Piece piece : soldPieces) {
+			statementService.logPiece(piece, "DELETE_SOLD", null, null, -piece.getNetWeight(),
+					-piece.getVariableWeight(), -1, "Sold piece deleted from box");
+
+			pieceRepository.delete(piece);
+		}
+
+		boxService.recalcBoxTotals(boxId);
+		return soldPieces.size();
+	}
 }
