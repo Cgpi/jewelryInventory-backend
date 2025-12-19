@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -64,20 +65,29 @@ public class PieceController {
 		service.deletePiece(id);
 		return ResponseEntity.ok("Piece deleted permanently");
 	}
-	
+
 	@DeleteMapping("/deleteSold")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<String> deleteAllSold() {
 
-	    int count = service.deleteAllSoldPieces();
-	    return ResponseEntity.ok(count + " sold pieces deleted permanently");
+		int count = service.deleteAllSoldPieces();
+		return ResponseEntity.ok(count + " sold pieces deleted permanently");
 	}
 
 	@DeleteMapping("/deleteSoldByBox")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<String> deleteSoldByBox(@RequestParam Long boxId) {
 
-	    int count = service.deleteSoldPiecesByBox(boxId);
-	    return ResponseEntity.ok(count + " sold pieces deleted from box " + boxId);
+		int count = service.deleteSoldPiecesByBox(boxId);
+		return ResponseEntity.ok(count + " sold pieces deleted from box " + boxId);
+	}
+
+	@DeleteMapping("/deleteSoldByDate")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<String> deleteSoldByDate(@RequestParam LocalDateTime startDate,
+			@RequestParam LocalDateTime endDate) {
+
+		int count = service.deleteSoldPiecesByDateRange(startDate, endDate);
+		return ResponseEntity.ok(count + " sold pieces deleted");
 	}
 }

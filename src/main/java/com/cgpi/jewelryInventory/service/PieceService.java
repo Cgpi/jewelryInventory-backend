@@ -184,4 +184,27 @@ public class PieceService {
 		boxService.recalcBoxTotals(boxId);
 		return soldPieces.size();
 	}
+
+	@Transactional
+	public int deleteSoldPiecesByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
+
+		List<Piece> soldPieces = pieceRepository.findBySoldTrueAndSoldAtBetween(startDate, endDate);
+
+		if (soldPieces.isEmpty()) {
+			return 0;
+		}
+
+		for (Piece piece : soldPieces) {
+			Long boxId = piece.getBoxId();
+
+			statementService.logPiece(piece, "DELETE_SOLD", null, null, -piece.getNetWeight(),
+					-piece.getVariableWeight(), -1, "Sold piece deleted between date range");
+
+			pieceRepository.delete(piece);
+			boxService.recalcBoxTotals(boxId);
+		}
+
+		return soldPieces.size();
+	}
+
 }
