@@ -57,4 +57,11 @@ public class LooseItemController {
 	public ResponseEntity<LooseItem> transfer(@RequestParam Long itemId, @RequestParam Long boxId) {
 		return ResponseEntity.ok(service.transferLooseItem(itemId, boxId));
 	}
+	
+	@DeleteMapping("/delete")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<String> delete(@RequestParam Long id) {
+		service.deleteLooseItem(id);
+		return ResponseEntity.ok("Loose item deleted successfully");
+	}
 }

@@ -132,4 +132,21 @@ public class LooseItemService {
 
 		return saved;
 	}
+
+	@Transactional
+	public void deleteLooseItem(Long id) {
+
+		LooseItem item = getById(id);
+
+		Long boxId = item.getBoxId();
+		double weight = item.getNetWeight();
+		double variableWeight = item.getVariableWeight();
+
+		statementService.logLoose(item, "DELETE", boxId, null, -weight, -variableWeight, "Loose item deleted");
+
+		looseItemRepository.delete(item);
+
+		boxService.recalcBoxTotals(boxId);
+	}
+
 }
