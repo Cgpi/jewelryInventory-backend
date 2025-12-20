@@ -155,9 +155,6 @@ public class PieceService {
 		for (Piece piece : soldPieces) {
 			Long boxId = piece.getBoxId();
 
-			statementService.logPiece(piece, "DELETE_SOLD", null, null, -piece.getNetWeight(),
-					-piece.getVariableWeight(), -1, "Sold piece permanently deleted");
-
 			pieceRepository.delete(piece);
 			boxService.recalcBoxTotals(boxId);
 		}
@@ -175,8 +172,6 @@ public class PieceService {
 		}
 
 		for (Piece piece : soldPieces) {
-			statementService.logPiece(piece, "DELETE_SOLD", null, null, -piece.getNetWeight(),
-					-piece.getVariableWeight(), -1, "Sold piece deleted from box");
 
 			pieceRepository.delete(piece);
 		}
@@ -196,9 +191,6 @@ public class PieceService {
 
 		for (Piece piece : soldPieces) {
 			Long boxId = piece.getBoxId();
-
-			statementService.logPiece(piece, "DELETE_SOLD", null, null, -piece.getNetWeight(),
-					-piece.getVariableWeight(), -1, "Sold piece deleted between date range");
 
 			pieceRepository.delete(piece);
 			boxService.recalcBoxTotals(boxId);
