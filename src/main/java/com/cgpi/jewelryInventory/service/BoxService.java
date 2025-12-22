@@ -102,29 +102,58 @@ public class BoxService {
 
 		return repo.save(box);
 	}
+	private double round3(double value) {
+	    return Math.round(value * 1000.0) / 1000.0;
+	}
 
 	public void recalcBoxTotals(Long boxId) {
-		Box box = repo.findById(boxId).orElseThrow(() -> new RuntimeException("Box not found"));
+	    Box box = repo.findById(boxId)
+	            .orElseThrow(() -> new RuntimeException("Box not found"));
 
-		List<Piece> pieces = pieceRepository.findByBoxId(boxId);
-		double totalPieceNet = pieces.stream().filter(p -> !p.isSold())
-				.mapToDouble(p -> p.getNetWeight() == null ? 0.0 : p.getNetWeight()).sum();
-		double totalPieceVar = pieces.stream().filter(p -> !p.isSold())
-				.mapToDouble(p -> p.getVariableWeight() == null ? 0.0 : p.getVariableWeight()).sum();
-		int totalPieceCount = (int) pieces.stream().filter(p -> !p.isSold()).count();
+	    List<Piece> pieces = pieceRepository.findByBoxId(boxId);
 
-		List<LooseItem> looseItems = looseItemRepository.findByBoxId(boxId);
-		double totalLooseNet = looseItems.stream().filter(l -> !l.isSold())
-				.mapToDouble(l -> l.getNetWeight() == null ? 0.0 : l.getNetWeight()).sum();
-		double totalLooseVar = looseItems.stream().filter(l -> !l.isSold())
-				.mapToDouble(l -> l.getVariableWeight() == null ? 0.0 : l.getVariableWeight()).sum();
+	    double totalPieceNet = pieces.stream()
+	            .filter(p -> !p.isSold())
+	            .mapToDouble(p -> p.getNetWeight() == null ? 0.0 : p.getNetWeight())
+	            .sum();
 
-		box.setNetWeight(totalPieceNet + totalLooseNet);
-		box.setVariableWeight(totalPieceVar + totalLooseVar);
-		box.setTotalPiece(totalPieceCount); // LooseItems don't increase count
+	    double totalPieceVar = pieces.stream()
+	            .filter(p -> !p.isSold())
+	            .mapToDouble(p -> p.getVariableWeight() == null ? 0.0 : p.getVariableWeight())
+	            .sum();
 
-		box.recalcGrossWeight();
-		box.setUpdatedAt(LocalDateTime.now());
-		repo.save(box);
+	    int totalPieceCount = (int) pieces.stream()
+	            .filter(p -> !p.isSold())
+	            .count();
+
+	    List<LooseItem> looseItems = looseItemRepository.findByBoxId(boxId);
+
+	    double totalLooseNet = round3(
+	            looseItems.stream()
+	                    .filter(l -> !l.isSold())
+	                    .mapToDouble(l -> l.getNetWeight() == null ? 0.0 : l.getNetWeight())
+	                    .sum()
+	    );
+
+	    double totalLooseVar = round3(
+	            looseItems.stream()
+	                    .filter(l -> !l.isSold())
+	                    .mapToDouble(l -> l.getVariableWeight() == null ? 0.0 : l.getVariableWeight())
+	                    .sum()
+	    );
+
+	    double netWeight = round3(totalPieceNet + totalLooseNet);
+	    double variableWeight = round3(totalPieceVar + totalLooseVar);
+
+	    box.setNetWeight(netWeight);
+	    box.setVariableWeight(variableWeight);
+	    box.setTotalPiece(totalPieceCount);
+
+	    double fixed = box.getFixedWeight() == null ? 0.0 : box.getFixedWeight();
+	    box.setGrossWeight(round3(fixed + netWeight));
+
+	    box.setUpdatedAt(LocalDateTime.now());
+	    repo.save(box);
 	}
+
 }

@@ -39,7 +39,7 @@ public class PieceService {
 		Piece saved = pieceRepository.save(piece);
 		boxService.recalcBoxTotals(saved.getBoxId());
 
-		statementService.logPiece(saved, "ADD", null, null, saved.getNetWeight(), saved.getVariableWeight(), 1,
+		statementService.logPiece(saved, "ADDED", null, null, saved.getNetWeight(), saved.getVariableWeight(), 1,
 				"Piece added");
 
 		return saved;
@@ -64,7 +64,7 @@ public class PieceService {
 		Piece saved = pieceRepository.save(existing);
 		boxService.recalcBoxTotals(boxId);
 
-		statementService.logPiece(saved, "UPDATE", null, null, saved.getNetWeight() - oldNet,
+		statementService.logPiece(saved, "UPDATED", null, null, saved.getNetWeight() - oldNet,
 				saved.getVariableWeight() - oldVar, 0, "Piece updated");
 
 		return saved;
@@ -124,7 +124,7 @@ public class PieceService {
 		Piece saved = pieceRepository.save(piece);
 		boxService.recalcBoxTotals(saved.getBoxId());
 
-		statementService.logPiece(saved, "SELL", null, null, -saved.getNetWeight(), -saved.getVariableWeight(), -1,
+		statementService.logPiece(saved, "SOLD", null, null, -saved.getNetWeight(), -saved.getVariableWeight(), -1,
 				"Piece sold");
 
 		return saved;
@@ -139,7 +139,7 @@ public class PieceService {
 		pieceRepository.delete(piece);
 		boxService.recalcBoxTotals(boxId);
 
-		statementService.logPiece(piece, "DELETE", null, null, -piece.getNetWeight(), -piece.getVariableWeight(), -1,
+		statementService.logPiece(piece, "DELETED", null, null, -piece.getNetWeight(), -piece.getVariableWeight(), -1,
 				"Piece deleted");
 	}
 
@@ -154,6 +154,9 @@ public class PieceService {
 
 		for (Piece piece : soldPieces) {
 			Long boxId = piece.getBoxId();
+			
+			statementService.logPiece(piece, "DELETED", null, null, -piece.getNetWeight(),
+					-piece.getVariableWeight(), -1, "Sold piece permanently deleted");
 
 			pieceRepository.delete(piece);
 			boxService.recalcBoxTotals(boxId);
@@ -172,6 +175,9 @@ public class PieceService {
 		}
 
 		for (Piece piece : soldPieces) {
+			
+			statementService.logPiece(piece, "DELETED", null, null, -piece.getNetWeight(),
+					-piece.getVariableWeight(), -1, "Sold piece permanently deleted");
 
 			pieceRepository.delete(piece);
 		}
@@ -191,6 +197,9 @@ public class PieceService {
 
 		for (Piece piece : soldPieces) {
 			Long boxId = piece.getBoxId();
+			
+			statementService.logPiece(piece, "DELETED", null, null, -piece.getNetWeight(),
+					-piece.getVariableWeight(), -1, "Sold piece permanently deleted");
 
 			pieceRepository.delete(piece);
 			boxService.recalcBoxTotals(boxId);
